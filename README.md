@@ -1,70 +1,250 @@
-# Getting Started with Create React App
+# 📸 **RunReel — AI-Powered Running Detection & Vertical Reel Generator**
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+RunReel is a fully client-side React application that automatically detects **running actions** in images and videos using **TensorFlow.js + BlazePose**, extracts the relevant highlights, and generates polished **vertical HD reels (720×1280)** with optional background music, captions, and smooth zoom effects.
 
-## Available Scripts
+It is designed for creators, runners, sports analysts, and anyone who wants quick highlight reels from raw footage — without uploading media to a server.
 
-In the project directory, you can run:
+---
 
-### `npm start`
+## 🚀 **Key Features**
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+### 🧠 **AI Pose Detection (BlazePose + TensorFlow.js)**
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+* Detects whether a person in an image or video is running
+* Computes a *running confidence* score
+* Supports multiple file types (JPG, PNG, MP4, MOV)
+* Processes entirely in the browser (no server required!)
 
-### `npm test`
+### 🎬 **Vertical Reel Generator (720×1280, 30 FPS)**
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+* Person-centered smart cropping
+* Subtle AI zoom-in / zoom-out effects for images
+* Smooth frame rendering using `canvas.captureStream()`
+* Handles videos frame-accurately using `requestVideoFrameCallback`
 
-### `npm run build`
+### 🎵 **Background Music Support**
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+* Upload any audio file (MP3, WAV, M4A, OGG)
+* Perfect looping for full reel duration
+* Smooth fade-in / fade-out (optional)
+* Advanced audio pipeline using `AudioContext`, `GainNode`, and `MediaStreamDestination`
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+### 📝 **Custom Title & End Cards**
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+* Dynamic caption duration (based on number of words)
+* Or fixed caption duration
+* Auto-font sizing & clean layout
 
-### `npm run eject`
+### 🌟 **Export**
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+* Downloads smooth HD vertical reel in **WebM (VP9 + Opus)**
+* High quality: **6 Mbps video, 30 FPS**
+* Works on Chrome, Edge, Opera, Firefox
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+---
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+## 🛠️ **Tech Stack**
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+| Component        | Technology                             |
+| ---------------- | -------------------------------------- |
+| Pose Detection   | TensorFlow.js + BlazePose              |
+| UI               | React + Tailwind + lucide-react icons  |
+| Video Processing | `<canvas>` + MediaRecorder API         |
+| Audio Mixing     | Web Audio API (AudioContext, GainNode) |
+| Effects          | Dynamic Cropping + Ken Burns zoom      |
+| Output           | WebM (VP9/VP8 + Opus)                  |
 
-## Learn More
+---
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+# 📦 **Installation & Setup**
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+### 1. Clone the repository
 
-### Code Splitting
+```bash
+git clone https://github.com/<your-username>/runreel.git
+cd runreel
+```
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+### 2. Install dependencies
 
-### Analyzing the Bundle Size
+```bash
+npm install
+```
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+### 3. Start development server
 
-### Making a Progressive Web App
+```bash
+npm start
+```
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+Runs on **[http://localhost:3000/](http://localhost:3000/)**
 
-### Advanced Configuration
+---
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+# 🧩 **Project Structure Overview**
 
-### Deployment
+```
+src/
+ ├── RunReelApp.jsx     # Main application
+ ├── index.js
+ └── styles.css
+public/
+ └── index.html
+```
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
+Everything is contained inside `RunReelApp.jsx` — no backend or external server is used.
 
-### `npm run build` fails to minify
+---
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+# ⚙️ **How the Pipeline Works**
+
+Below is a simplified explanation for developers who want to create similar applications.
+
+---
+
+## **1. Pose Model Initialization**
+
+```js
+detectorRef.current = await poseDetection.createDetector(
+    poseDetection.SupportedModels.BlazePose,
+    { runtime: "tfjs", modelType: "lite" }
+);
+```
+
+The BlazePose model runs entirely on WebGL in the browser.
+
+---
+
+## **2. Running Detection Logic**
+
+Each pose frame is analyzed to compute:
+
+* **Leg spread**
+* **Hip width ratio**
+* **Hip tilt**
+* **Arm swing**
+* **Stride factor**
+
+Then a normalized running confidence value is computed:
+
+```js
+const runningConfidence = Math.min(
+    1,
+    (strideFactor * 0.6 + armSwing * 0.3 + hipTilt * 0.1) * 2.5
+);
+```
+
+---
+
+## **3. Smart Cropping & Person Centering**
+
+Each frame centers automatically around:
+
+* Nose position (preferred)
+* Hip midpoint (fallback)
+
+This prevents "jumping" crops and maintains the runner at the center of the vertical frame.
+
+---
+
+## **4. Frame-by-Frame Rendering**
+
+A hidden 720×1280 `<canvas>` renders every frame:
+
+```js
+const videoStream = canvas.captureStream(FPS);
+```
+
+Images optionally receive a Ken Burns-style zoom effect:
+
+* `zoomIn`
+* `zoomOut`
+* `none`
+
+Videos use `requestVideoFrameCallback()` for smooth sync.
+
+---
+
+## **5. Audio Mixing (Music + Video)**
+
+This uses the exact pipeline from the stable “A-version”:
+
+```js
+const ctx = new AudioContext();
+const dest = ctx.createMediaStreamDestination();
+const src = ctx.createBufferSource();
+src.buffer = audioBuffer;
+src.loop = true;
+
+src.connect(gain).connect(dest);
+
+mixedStream = new MediaStream([
+  ...videoStream.getVideoTracks(),
+  ...dest.stream.getAudioTracks(),
+]);
+```
+
+This approach guarantees:
+
+✔ Music plays until the very end
+✔ No early cutoff
+✔ Smooth fade-in/out
+✔ Audio/video perfectly synced
+
+---
+
+## **6. Final Export via MediaRecorder**
+
+```js
+const recorder = new MediaRecorder(mixedStream, {
+  mimeType: "video/webm;codecs=vp9,opus",
+  videoBitsPerSecond: 6000000
+});
+```
+
+Chunks are collected, then converted into a downloadable WebM file.
+
+---
+
+# 📘 **How to Build Similar Applications**
+
+To replicate this system, you need to understand and combine:
+
+### ✔ Pose detection → TensorFlow.js / WebGL
+
+Use BlazePose or MoveNet.
+BlazePose performs better for full-body running recognition.
+
+### ✔ Video frame extraction → `<canvas>` & Web APIs
+
+* Draw frames manually
+* Apply cropping + transformations
+* Capture at consistent FPS
+
+### ✔ Music mixing → Web Audio API
+
+* Decode audio (`decodeAudioData`)
+* Loop or trim
+* Combine with MediaStream
+* Use GainNode for volume control
+
+### ✔ Rendering final video → MediaRecorder
+
+* Capture canvas
+* Merge audio
+* Export as WebM
+
+This project demonstrates how all of these pieces fit together to build a fully client-side AI media engine.
+
+---
+
+# 🤝 Contributing
+
+Pull requests are welcome!
+For major changes, please open an issue to discuss what you’d like to improve.
+
+---
+
+# 📄 License
+
+MIT License — free to use, modify, and build upon.
