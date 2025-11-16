@@ -811,7 +811,7 @@ const RunReelApp = () => {
           >
             <Camera className="w-16 h-16 text-purple-300 mx-auto mb-3" />
             <p className="text-white font-medium mb-1">
-              Click or drag to upload images & videos
+              Click to upload images & videos
             </p>
             <p className="text-purple-200 text-sm">Supported: JPG, PNG, MP4, MOV</p>
             <input
